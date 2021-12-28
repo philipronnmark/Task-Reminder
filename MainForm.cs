@@ -16,6 +16,7 @@ namespace A6
     {
         private Task task = new Task();
         private bool selectedTask = false;
+        private TaskManager taskManager = new TaskManager();
         public MainForm()
         {
             InitializeComponent();
@@ -33,7 +34,7 @@ namespace A6
             CheckButtonEnableOrNot();
             int i = 0;
             lboxTasks.Items.Clear();
-            foreach(Task t in TaskManager.GetTasks())
+            foreach(Task t in taskManager.GetTasks())
             {
                 lboxTasks.Items.Add(t);
             }
@@ -45,7 +46,7 @@ namespace A6
         private void CheckButtonEnableOrNot()
         {
 
-            if (TaskManager.GetTasks().Count > 0 && selectedTask)
+            if (taskManager.GetTasks().Count > 0 && selectedTask)
             {
                 btnChange.Enabled = true;
                 btnDelete.Enabled = true;
@@ -67,11 +68,9 @@ namespace A6
         private void lboxTasks_SelectedIndexChanged(object sender, EventArgs e)
         {
             
-
-            Console.WriteLine(lboxTasks.SelectedIndex);
             if(lboxTasks.SelectedIndex > -1)
             {
-                displayTaskForChange(TaskManager.GetTask(lboxTasks.SelectedIndex));
+                displayTaskForChange(taskManager.GetTask(lboxTasks.SelectedIndex));
                 selectedTask = true;
                 
             }
@@ -99,7 +98,7 @@ namespace A6
 
                 task.Description = txtDesc.Text;
                 task.Priority = (PriorityType)cboxPriority.SelectedItem;
-                TaskManager.AddTask(task);
+                taskManager.AddTask(task);
                 task = new Task();
                 lboxTasks.SelectedIndex = -1; //So that form does not auto select the next list item
                 refreshLbox();
@@ -136,7 +135,7 @@ namespace A6
                 DialogResult dialogResult = MessageBox.Show("This will delete the task, are you sure?", "Close", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    TaskManager.deleteTask(lboxTasks.SelectedIndex);
+                    taskManager.deleteTask(lboxTasks.SelectedIndex);
                     lboxTasks.SelectedIndex = -1; //So that form does not auto select the next list item
                     refreshLbox();
                 }
@@ -168,9 +167,11 @@ namespace A6
             task.Date = dateTimePicker.Value;
             task.Description = txtDesc.Text;
             task.Priority = (PriorityType)cboxPriority.SelectedItem;
+            lboxTasks.SelectedIndex = -1; //So that form does not auto select the next list item
             refreshLbox();
             resetAddFields();
             task = new Task();
+            
 
         }
 
@@ -196,7 +197,7 @@ namespace A6
             this.Controls.Clear();
             this.InitializeComponent();
             cboxPriority.DataSource = Enum.GetValues(typeof(PriorityType));
-            TaskManager.resetTasks();
+            taskManager.resetTasks();
 
         }
 
@@ -221,7 +222,7 @@ namespace A6
                 task.Description = words[1];
                 PriorityType p;
                 task.Priority = (PriorityType)Enum.Parse(typeof(PriorityType), words[2]);
-                TaskManager.AddTask(task);
+                taskManager.AddTask(task);
                 task = new Task();
                 refreshLbox();
 
@@ -243,7 +244,7 @@ namespace A6
             var path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "reminders.txt");
             using (TextWriter tw = new StreamWriter(path))
             {
-                foreach (Task t in TaskManager.GetTasks())
+                foreach (Task t in taskManager.GetTasks())
                 {
                     tw.WriteLine(string.Format("{0},{1},{2}", t.Date, t.Description, t.Priority));
                 }
